@@ -20,11 +20,5 @@ jobs:
         with:
           go-version: 1.19
 
-      # Create token.json
-      # Create account.json
-
-      - name: Build
-        run: go build -v ./...
-
       - name: Test
         run: go test -v ./...
