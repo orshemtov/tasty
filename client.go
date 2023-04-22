@@ -16,15 +16,10 @@ var (
 )
 
 func init() {
-	acc, err := readAccountNumber()
+	c, err := LoadConfig()
 	if err != nil {
 		panic(err)
 	}
-	accountNumber = acc
-
-	t, err := readToken()
-	if err != nil {
-		panic(err)
-	}
-	token = t
+	accountNumber = c.AccountNumber
+	token = c.Token
 }

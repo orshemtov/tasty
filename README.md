@@ -11,51 +11,7 @@ The following environment variables are required:
 
 You'll need a token to authenticate with the API, and an account ID.
 
-### Token
-
-```go
-r, err := Auth()
-if errr != nil {
-    panic(err)
-}
-fmt.Printf("token: %s\n", r.Data.SessionToken)
-```
-
-Save the response from the API in `.cache/token.json`:
-
-```json
-{
-    "data": {
-        "user": {
-            "email": "me@email.com",
-            "username": "myusername",
-            "external-id": "..."
-        },
-        "session-token": "session-token-here"
-    },
-    "context": "/sessions"
-}
-```
-
-### Account ID
-
-```go
-r, err := Accounts()
- if err != nil {
-  panic(err)
- }
- for _, a := range r.Data.Items {
-  fmt.Printf("account ID: %s\n", a.Account.AccountNumber)
- }
-```
-
-Save the account ID in `.cache/account.json` like so:
-
-```json
-{
-    "number": "5AB25D45"
-}
-```
+There's a `LoadConfig` function that will take care of saving both to `~/.tastyworks/config.json`, the function will run on init() when loading the library.
 
 ## Usage
 
