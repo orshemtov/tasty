@@ -8,10 +8,11 @@ The following environment variables are required:
 
 1. `TASTYWORKS_PASSWORD`
 2. `TASTYWORKS_USERNAME`
+3. `TASTYWORKS_ACCOUNT_NUMBER` (There is an `/accounts` endpoint where you can fetch this from)
 
-You'll need a token to authenticate with the API, and an account ID.
+You'll need a token to authenticate with the API.
 
-There's a `LoadConfig` function that will take care of saving both to `~/.tastyworks/config.json`, the function will run on init() when loading the library.
+There's a `LoadConfig` function that will take care of saving it to `~/.tastyworks/config.json`, the function will run on init() when loading the library.
 
 ## Usage
 

@@ -7,8 +7,7 @@ import (
 )
 
 type Config struct {
-	Token         string `json:"token"`
-	AccountNumber string `json:"accountNumber"`
+	Token string `json:"token"`
 }
 
 func NewConfig() (*Config, error) {
@@ -18,14 +17,7 @@ func NewConfig() (*Config, error) {
 	}
 	token := auth.Data.SessionToken
 
-	accounts, err := Accounts()
-	if err != nil {
-		return nil, err
-	}
-	acc := accounts.Data.Items[len(accounts.Data.Items)-1]
-	accNumber := acc.Account.AccountNumber
-
-	c := Config{Token: token, AccountNumber: accNumber}
+	c := Config{Token: token}
 
 	return &c, nil
 }

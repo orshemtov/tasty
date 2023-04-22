@@ -11,7 +11,7 @@ var (
 	client        = http.Client{}
 	username      = os.Getenv("TASTYWORKS_USERNAME")
 	password      = os.Getenv("TASTYWORKS_PASSWORD")
-	accountNumber string
+	accountNumber = os.Getenv("TASTYWORKS_ACCOUNT_NUMBER")
 	token         string
 )
 
@@ -20,6 +20,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	accountNumber = c.AccountNumber
 	token = c.Token
 }
