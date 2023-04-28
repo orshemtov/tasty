@@ -12,7 +12,7 @@ import (
 // TODO
 // const maxSymbolSummaryBatchSize = 500
 
-type MarketDataResponse struct {
+type MarketMetricsRespones struct {
 	Data struct {
 		Items []struct {
 			Symbol                                 string    `json:"symbol"`
@@ -75,7 +75,7 @@ type MarketDataResponse struct {
 	} `json:"data"`
 }
 
-func MarketMetrics(symbols []string) (*MarketDataResponse, error) {
+func MarketMetrics(symbols []string) (*MarketMetricsRespones, error) {
 	endpoint := fmt.Sprintf("/market-metrics?symbols=%s", strings.Join(symbols, ","))
 
 	u, err := url.Parse(baseUrl + endpoint)
@@ -93,7 +93,7 @@ func MarketMetrics(symbols []string) (*MarketDataResponse, error) {
 		return nil, err
 	}
 
-	var r MarketDataResponse
+	var r MarketMetricsRespones
 	err = json.Unmarshal(respBody, &r)
 	if err != nil {
 		return nil, err
