@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"time"
 )
 
 type Config struct {
-	Token string `json:"token"`
+	Token     string    `json:"token"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func NewConfig() (*Config, error) {
@@ -17,7 +19,10 @@ func NewConfig() (*Config, error) {
 	}
 	token := auth.Data.SessionToken
 
-	c := Config{Token: token}
+	c := Config{
+		Token:     token,
+		UpdatedAt: time.Now().UTC(),
+	}
 
 	return &c, nil
 }

@@ -37,7 +37,6 @@ symbols := []string{"AAPL", "GOOG"}
 
 ## TODO
 
-- Save auth token and account ID at `~/.tastyworks/config`
 - Cache token, invalidate the cache if the token has expired
 - `PositionsResponse` struct from JSON response
 - Improve typing on structs that parse JSON responses

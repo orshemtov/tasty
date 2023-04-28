@@ -2,7 +2,6 @@ package tasty
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 )
@@ -35,19 +34,7 @@ func PublicWatchlists() (*PublicWatchlistsResponse, error) {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", token)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		panic(resp.StatusCode)
-	}
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := doRequest(req)
 	if err != nil {
 		return nil, err
 	}

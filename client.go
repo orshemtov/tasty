@@ -1,6 +1,7 @@
 package tasty
 
 import (
+	"log"
 	"net/http"
 	"os"
 )
@@ -18,7 +19,7 @@ var (
 func init() {
 	c, err := LoadConfig()
 	if err != nil {
-		panic(err)
+		log.Fatalf("could not load config, err = %v", err)
 	}
 	token = c.Token
 }

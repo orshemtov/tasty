@@ -3,7 +3,6 @@ package tasty
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 )
@@ -48,19 +47,7 @@ func Auth() (*AuthResponse, error) {
 		return nil, err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		panic(resp.StatusCode)
-	}
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := doRequest(req)
 	if err != nil {
 		return nil, err
 	}
