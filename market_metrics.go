@@ -9,10 +9,9 @@ import (
 	"time"
 )
 
-// TODO
-// const maxSymbolSummaryBatchSize = 500
+const maxSymbolSummaryBatchSize = 300
 
-type MarketMetricsRespones struct {
+type MarketMetricsResponse struct {
 	Data struct {
 		Items []struct {
 			Symbol                                 string    `json:"symbol"`
@@ -75,29 +74,50 @@ type MarketMetricsRespones struct {
 	} `json:"data"`
 }
 
-func MarketMetrics(symbols []string) (*MarketMetricsRespones, error) {
-	endpoint := fmt.Sprintf("/market-metrics?symbols=%s", strings.Join(symbols, ","))
+func splitSymbolsToBatches(symbols []string) [][]string {
+	length := len(symbols)
+	var batches [][]string
+	for i := 0; i < length; i += maxSymbolSummaryBatchSize {
+		end := i + maxSymbolSummaryBatchSize
+		if end > length {
+			end = length
+		}
+		batch := symbols[i:end]
+		batches = append(batches, batch)
+	}
+	return batches
+}
 
-	u, err := url.Parse(baseUrl + endpoint)
-	if err != nil {
-		return nil, err
+func MarketMetrics(symbols []string) (*MarketMetricsResponse, error) {
+	var result MarketMetricsResponse
+	batches := splitSymbolsToBatches(symbols)
+
+	for _, symbols := range batches {
+		endpoint := fmt.Sprintf("/market-metrics?symbols=%s", strings.Join(symbols, ","))
+
+		u, err := url.Parse(baseUrl + endpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+		if err != nil {
+			return nil, err
+		}
+
+		respBody, err := doRequest(req)
+		if err != nil {
+			return nil, err
+		}
+
+		var r MarketMetricsResponse
+		err = json.Unmarshal(respBody, &r)
+		if err != nil {
+			return nil, err
+		}
+
+		result.Data.Items = append(result.Data.Items, r.Data.Items...)
 	}
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	respBody, err := doRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var r MarketMetricsRespones
-	err = json.Unmarshal(respBody, &r)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
+	return &result, nil
 }
