@@ -17,14 +17,37 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	token := auth.Data.SessionToken
 
 	c := Config{
-		Token:     token,
+		Token:     auth.Data.SessionToken,
 		UpdatedAt: time.Now().UTC(),
 	}
 
 	return &c, nil
+}
+
+func writeConfig(configPath string) (*Config, error) {
+	conf, err := NewConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := json.Marshal(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.MkdirAll(path.Dir(configPath), 0700)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.WriteFile(configPath, b, 0600)
+	if err != nil {
+		return nil, err
+	}
+
+	return conf, nil
 }
 
 func LoadConfig() (*Config, error) {
@@ -32,32 +55,13 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	configPath := path.Join(home, ".tastyworks", "config.json")
 
+	configPath := path.Join(home, ".tastyworks", "config.json")
 	_, err = os.Stat(configPath)
+
 	if os.IsNotExist(err) {
 		// config file does not exist, create it with NewConfig
-		conf, err := NewConfig()
-		if err != nil {
-			return nil, err
-		}
-
-		b, err := json.Marshal(conf)
-		if err != nil {
-			return nil, err
-		}
-
-		err = os.MkdirAll(path.Dir(configPath), 0700)
-		if err != nil {
-			return nil, err
-		}
-
-		err = os.WriteFile(configPath, b, 0600)
-		if err != nil {
-			return nil, err
-		}
-
-		return conf, nil
+		return writeConfig(configPath)
 	} else if err != nil {
 		// unexpected error while checking for file existence
 		return nil, err
@@ -73,6 +77,11 @@ func LoadConfig() (*Config, error) {
 	err = json.Unmarshal(b, &c)
 	if err != nil {
 		return nil, err
+	}
+
+	expiresAfter := 12 * time.Hour
+	if time.Now().UTC().After(c.UpdatedAt.Add(expiresAfter)) {
+		return writeConfig(configPath)
 	}
 
 	return &c, nil
