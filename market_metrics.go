@@ -3,13 +3,15 @@ package tasty
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
-const maxSymbolSummaryBatchSize = 300
+const maxSymbolSummaryBatchSize = 250
+const maxAttempts = 5
 
 type MarketMetricsResponse struct {
 	Data struct {
@@ -91,33 +93,49 @@ func splitSymbolsToBatches(symbols []string) [][]string {
 func MarketMetrics(symbols []string) (*MarketMetricsResponse, error) {
 	var result MarketMetricsResponse
 	batches := splitSymbolsToBatches(symbols)
-
-	for _, symbols := range batches {
-		endpoint := fmt.Sprintf("/market-metrics?symbols=%s", strings.Join(symbols, ","))
-
-		u, err := url.Parse(baseUrl + endpoint)
-		if err != nil {
-			return nil, err
+	for _, batch := range batches {
+		attempts := 0
+		for {
+			resp, err := makeMarketMetricsRequest(batch)
+			if err != nil {
+				attempts++
+				backoff := time.Duration(math.Pow(2, float64(attempts))) * time.Second
+				if attempts > maxAttempts {
+					return nil, err
+				}
+				time.Sleep(backoff)
+				continue
+			}
+			result.Data.Items = append(result.Data.Items, resp.Data.Items...)
+			break
 		}
+	}
+	return &result, nil
+}
 
-		req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-		if err != nil {
-			return nil, err
-		}
+func makeMarketMetricsRequest(symbols []string) (*MarketMetricsResponse, error) {
+	endpoint := fmt.Sprintf("/market-metrics?symbols=%s", strings.Join(symbols, ","))
 
-		respBody, err := doRequest(req)
-		if err != nil {
-			return nil, err
-		}
-
-		var r MarketMetricsResponse
-		err = json.Unmarshal(respBody, &r)
-		if err != nil {
-			return nil, err
-		}
-
-		result.Data.Items = append(result.Data.Items, r.Data.Items...)
+	u, err := url.Parse(baseUrl + endpoint)
+	if err != nil {
+		return nil, err
 	}
 
-	return &result, nil
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	respBody, err := doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var r MarketMetricsResponse
+	err = json.Unmarshal(respBody, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &r, nil
 }
